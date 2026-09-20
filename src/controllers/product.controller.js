@@ -63,45 +63,6 @@ export const updateProduct = async (req, res, next) => {
   }
 };
 
-export const patchProduct = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-
-    const updateData = {};
-
-    const allowedFields = [
-      'name',
-      'description',
-      'price',
-      'stock',
-      'status'
-    ];
-
-    allowedFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        updateData[field] = req.body[field];
-      }
-    });
-
-    const product = await productModel.update(
-      id,
-      updateData
-    );
-
-    if (!product) {
-      return sendResponse(
-        res,
-        404,
-        null,
-        { message: 'Product not found' }
-      );
-    }
-
-    sendResponse(res, 200, product);
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const patchProduct = async (req, res, next) => {
   try {
