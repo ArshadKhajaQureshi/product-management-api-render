@@ -1,9 +1,11 @@
-import { productRepository } from '../repositories/product.repository.js';
+// src/controllers/productController.js
+
+import * as productModel from '../models/product.js';
 import { sendResponse } from '../middleware/responseHandler.js';
 
 export const getAllProducts = async (req, res, next) => {
   try {
-    const products = await productRepository.findAll();
+    const products = await productModel.findAll();
     sendResponse(res, 200, products);
   } catch (error) {
     next(error);
@@ -12,10 +14,17 @@ export const getAllProducts = async (req, res, next) => {
 
 export const getProductById = async (req, res, next) => {
   try {
-    const product = await productRepository.findById(req.params.id);
+    const product = await productModel.findById(req.params.id);
+
     if (!product) {
-      return sendResponse(res, 404, null, { message: 'Product not found' });
+      return sendResponse(
+        res,
+        404,
+        null,
+        { message: 'Product not found' }
+      );
     }
+
     sendResponse(res, 200, product);
   } catch (error) {
     next(error);
@@ -24,7 +33,8 @@ export const getProductById = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    const product = await productRepository.create(req.body);
+    const product = await productModel.create(req.body);
+
     sendResponse(res, 201, product);
   } catch (error) {
     next(error);
@@ -33,10 +43,60 @@ export const createProduct = async (req, res, next) => {
 
 export const updateProduct = async (req, res, next) => {
   try {
-    const product = await productRepository.update(req.params.id, req.body);
+    const product = await productModel.update(
+      req.params.id,
+      req.body
+    );
+
     if (!product) {
-      return sendResponse(res, 404, null, { message: 'Product not found' });
+      return sendResponse(
+        res,
+        404,
+        null,
+        { message: 'Product not found' }
+      );
     }
+
+    sendResponse(res, 200, product);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const patchProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const updateData = {};
+
+    const allowedFields = [
+      'name',
+      'description',
+      'price',
+      'stock',
+      'status'
+    ];
+
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    const product = await productModel.update(
+      id,
+      updateData
+    );
+
+    if (!product) {
+      return sendResponse(
+        res,
+        404,
+        null,
+        { message: 'Product not found' }
+      );
+    }
+
     sendResponse(res, 200, product);
   } catch (error) {
     next(error);
@@ -45,11 +105,24 @@ export const updateProduct = async (req, res, next) => {
 
 export const deleteProduct = async (req, res, next) => {
   try {
-    const deleted = await productRepository.delete(req.params.id);
+    const deleted = await productModel.remove(
+      req.params.id
+    );
+
     if (!deleted) {
-      return sendResponse(res, 404, null, { message: 'Product not found' });
+      return sendResponse(
+        res,
+        404,
+        null,
+        { message: 'Product not found' }
+      );
     }
-    sendResponse(res, 200, { message: 'Product deleted successfully' });
+
+    sendResponse(
+      res,
+      200,
+      { message: 'Product deleted successfully' }
+    );
   } catch (error) {
     next(error);
   }
